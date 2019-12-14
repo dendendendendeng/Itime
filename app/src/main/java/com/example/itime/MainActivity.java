@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     int reclen = 11;
     ViewPager viewPager;
 
-
+    //随便加了一行注释测试GitHub更新功能
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
