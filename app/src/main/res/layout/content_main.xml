@@ -22,18 +22,17 @@
 
     <TextView
         android:id="@+id/textView_time2"
-        android:layout_width="411dp"
-        android:layout_height="51dp"
+        android:layout_width="414dp"
+        android:layout_height="112dp"
         android:layout_marginBottom="72dp"
         android:gravity="center"
-        android:text="timeout"
-        android:textSize="30dp"
+        android:textSize="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.899" />
+        app:layout_constraintVertical_bias="1.0" />
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/view_pager_main"

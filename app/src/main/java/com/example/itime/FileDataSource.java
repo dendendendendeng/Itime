@@ -14,29 +14,36 @@ public class FileDataSource {
         this.context = context;
     }
 
+    private ArrayList<MyTime> myTimes = new ArrayList<MyTime>();
+
+    public ArrayList<MyTime> getTimes(){
+        return myTimes;
+    }
+
     public void  save(){
         try {
             ObjectOutputStream outputStream = new ObjectOutputStream(
                     context.openFileOutput("Serializable.txt",Context.MODE_PRIVATE)
             );
-            //outputStream.writeObject(goods);
+            outputStream.writeObject(myTimes);
             outputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void load(){
+    public ArrayList<MyTime> load(){
 
         try{
             ObjectInputStream inputStream = new ObjectInputStream(
                     context.openFileInput("Serializable.txt")
             );
-            //goods = (ArrayList<Good>) inputStream.readObject();
+            myTimes = (ArrayList<MyTime>) inputStream.readObject();
             inputStream.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return myTimes;
     }
 
 }

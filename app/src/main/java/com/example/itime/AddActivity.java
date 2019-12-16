@@ -14,9 +14,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -30,6 +32,10 @@ import java.util.List;
 
 public class AddActivity extends AppCompatActivity {
     private List<Add_item> addItemList = new ArrayList<Add_item>();//保存每一个条项里的内容
+    MyTime myTime;
+    EditText title;
+    EditText tips;
+    Bitmap bitmap;
     ImageButton button_return;
     ImageButton button_confirm;
 
@@ -38,13 +44,20 @@ public class AddActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add);
 
-        Intent myItennt = getIntent();//从主页面跳转过来
+        title =(EditText) findViewById(R.id.editText_add_title);
+        tips =(EditText) findViewById(R.id.editText_add_comment);
+
+        final Intent myItennt = getIntent();//从主页面跳转过来
 
         button_return = (ImageButton) findViewById(R.id.imageButton_return);
         button_return.setOnClickListener(new View.OnClickListener() {//点击返回主页面，这时不进行数据传递
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent();
+                myTime.setTitle(title.getText().toString());
+                myTime.setTips(tips.getText().toString());
+                myTime.setBitmap(bitmap);
+                intent.putExtra("test",myTime);
                 intent.setClass(AddActivity.this,MainActivity.class);
                 AddActivity.this.startActivity(intent);
             }
@@ -55,11 +68,9 @@ public class AddActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent();
+                title.setText("");
                 intent.setClass(AddActivity.this,MainActivity.class);
                 AddActivity.this.startActivity(intent);
-
-
-
             }
         });
 
@@ -118,7 +129,7 @@ public class AddActivity extends AppCompatActivity {
             Log.e("uri", uri.toString());
             ContentResolver cr = this.getContentResolver();
             try {
-                Bitmap bitmap = BitmapFactory.decodeStream(cr.openInputStream(uri));
+                bitmap = BitmapFactory.decodeStream(cr.openInputStream(uri));
                 //在layout下面放置了一张背景图片imageview，用来动态改变背景
                 ImageView imageView = (ImageView) findViewById(R.id.layout_back_image);
                 /* 将Bitmap设定到ImageView */

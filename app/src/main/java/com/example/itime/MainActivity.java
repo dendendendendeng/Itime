@@ -6,10 +6,12 @@ import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import android.os.CountDownTimer;
 import android.view.MenuItem;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -28,6 +30,7 @@ import android.view.Menu;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -35,11 +38,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private AppBarConfiguration mAppBarConfiguration;
     TextView textView_time;
-    Timer timer;
-    int reclen = 11;
+    CountDownTimer downTimer;
     ViewPager viewPager;
+    private ArrayList<MyTime> myTimes;
 
-    //随便加了一行注释测试GitHub更新功能
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //右下角按钮点击事件
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,27 +82,94 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
          */
 
         textView_time = (TextView) findViewById(R.id.textView_time2);
-        timer = new Timer();
 
-        timer.schedule(task,1000,1000);
+        //显示倒计时
+        downTimer = new CountDownTimer(14*30*24*60*60*1000,1000) {
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+                textView_time.setText(formatTime(millisUntilFinished));
+            }
+
+            //倒计时结束后的操作
+            @Override
+            public void onFinish() {
+                textView_time.setText("");
+            }
+
+            //返回格式化的日期和时间
+            public String formatTime(long millisecond) {
+                long day;
+                long hour;
+                long minute;
+                long second;
+
+                //获取系统当前时间
+                long time=System.currentTimeMillis();
+
+                /*
+                int year;
+                int month;
+                year = (int) ((millisecond/1000/60/60/24)/365);
+                month =  (int) (((millisecond-(365*year*24*60*60*1000))/1000/60/60/24)/30);
+                day = (int) ((millisecond-(365*year*24*60*60*1000)-(30*month*24*60*60*1000))/1000/60/60/24);
+                hour = (int) ((millisecond-(365*year*24*60*60*1000)-(30*month*24*60*60*1000)-(day*24*60*60*1000))/1000/60/60);
+                minute = (int) ((millisecond-(365*year*24*60*60*1000)-(30*month*24*60*60*1000)-(day*24*60*60*1000)-(hour*60*60*1000))/1000/60);
+                second = (int) (((millisecond-(365*year*24*60*60*1000)-(30*month*24*60*60*1000)-(day*24*60*60*1000)-(hour*60*60*1000)-(minute*1000*60))/1000)%60);
+
+                  if (year==0){
+                    if (month==0){
+                        if (day==0){
+                            if (hour==0){
+                                if (minute==0){
+                                    return second + "秒";
+                                }else {
+                                    return minute + "分" +second + "秒";
+                                }
+                            }else {
+                                return hour + "时" + minute + "分" +second + "秒";
+                            }
+                        }else {
+                            return day + "天" + hour + "时" + minute + "分" +second + "秒";
+                        }
+                    }else {
+                        return month + "月" + day + "天" + hour + "时" + minute + "分" +second + "秒";
+                    }
+                }else {
+                    return year + "年" + month + "月" + day + "天" + hour + "时" + minute + "分" +second + "秒";
+                }
+                 */
+
+                day = (long) ((millisecond)/1000/60/60/24);
+                hour = (long) ((millisecond-(day*24*60*60*1000))/1000/60/60);
+                minute = (long) ((millisecond-(day*24*60*60*1000)-(hour*60*60*1000))/1000/60);
+                second = (long) (((millisecond-(day*24*60*60*1000)-(hour*60*60*1000)-(minute*1000*60))/1000)%60);
+
+                if(day==0){
+                    if(hour==0){
+                        if (minute==0){
+                            return second + "秒";
+                        }else {
+                            return minute + "分" + second + "秒";
+                        }
+                    }else {
+                        return hour+"时" + minute + "分" + second + "秒";
+                    }
+                }else {
+                    return day + "天" + hour + "时" + minute + "分" + second + "秒";
+                }
+            }
+        };
+
+        downTimer.start();
     }
 
-    TimerTask task = new TimerTask() {
-        @Override
-        public void run() {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    reclen--;
-                    textView_time.setText(""+reclen);
-                    if(reclen<0){
-                        timer.cancel();
-                        textView_time.setVisibility(View.GONE);
-                    }
-                }
-            });
-        }
-    };
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        //String title = data.getIntent().getSerializableExtra("test");
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -117,7 +187,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onNavigationItemSelected (@NonNull MenuItem menuItem){
-
         return false;
     }
 
