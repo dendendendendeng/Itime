@@ -19,7 +19,7 @@
         tools:srcCompat="@drawable/ic_launcher_background" />
 
     <ListView
-        android:id="@+id/list_item_check"
+        android:id="@+id/listView_item_check"
         android:layout_width="match_parent"
         android:layout_height="485dp"
         android:layout_alignParentEnd="true"

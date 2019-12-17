@@ -10,16 +10,24 @@ public class MyTime implements Serializable {
     String tips;
     Date date;
     long repeat;
-    Bitmap bitmap;
+    byte[] picture;
 
     public MyTime (){ }
 
-    public MyTime(String title, String tips, Date date, Bitmap bitmap,long repeat) {
+    public MyTime(String title, String tips, Date date,long repeat,byte[] picture) {
         this.title = title;
         this.tips = tips;
         this.date = date;
-        this.bitmap = bitmap;
         this.repeat = repeat;
+        this.picture = picture;
+    }
+
+    public byte[] getPicture() {
+        return picture;
+    }
+
+    public void setPicture(byte[] picture) {
+        this.picture = picture;
     }
 
     public Date getDate() {
@@ -54,11 +62,4 @@ public class MyTime implements Serializable {
         this.tips = tips;
     }
 
-    public Bitmap getBitmap() {
-        return bitmap;
-    }
-
-    public void setBitmap(Bitmap bitmap) {
-        this.bitmap = bitmap;
-    }
 }

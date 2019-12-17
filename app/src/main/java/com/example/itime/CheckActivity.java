@@ -4,12 +4,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -19,9 +20,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 public class CheckActivity extends AppCompatActivity {
+    List<Check_Item> check_items = new ArrayList<Check_Item>();
+    ListView listView;
     ImageButton button_return;
     ImageButton button_delete;
     ImageButton button_edit;
@@ -47,7 +54,14 @@ public class CheckActivity extends AppCompatActivity {
         date = (TextView) findViewById(R.id.textView_date_check);
         time = (TextView) findViewById(R.id.textView_time_check);
         title.setText(myTime.getTitle());
-        date.setText(simpleDateFormat.format(myTime.getBitmap()));
+        date.setText(simpleDateFormat.format(myTime.getDate()));
+
+        initItem();
+        listView = (ListView) findViewById(R.id.listView_item_check);
+        ArrayAdapter arrayAdapter = new CheckAdapter(this,R.layout.list_item_check,check_items);
+        listView.setAdapter(arrayAdapter);
+
+        //倒计时
         countDownTimer = new CountDownTimer(transformTime(myTime.getDate()),1000) {
             @Override
             public void onTick(long millisUntilFinished) {
@@ -109,6 +123,17 @@ public class CheckActivity extends AppCompatActivity {
 
     }
 
+    private void initItem() {
+        Check_Item inform = new Check_Item(R.drawable.inform,"通知栏");
+        check_items.add(inform);
+        Check_Item date = new Check_Item(R.drawable.date,"在日历中显示");
+        check_items.add(date);
+        Check_Item quick = new Check_Item(R.drawable.list,"快捷图标");
+        check_items.add(quick);
+        Check_Item window = new Check_Item(R.drawable.window,"悬浮窗口");
+        check_items.add(window);
+    }
+
     //规定了日期的格式
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH时mm分ss秒");
 
@@ -144,11 +169,51 @@ public class CheckActivity extends AppCompatActivity {
     }
 
     protected class CheckAdapter extends ArrayAdapter {
+        int resouseId;
 
         public CheckAdapter(@NonNull Context context, int resource, @NonNull List objects) {
             super(context, resource, objects);
+            this.resouseId = resource;
+        }
 
+        @NonNull
+        @Override
+        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+            Check_Item check_item = (Check_Item) getItem(position);
+            View view = LayoutInflater.from(getContext()).inflate(resouseId,null);
+            ImageView checkImage = (ImageView) view.findViewById(R.id.imageView_list_check);
+            TextView checkText = (TextView) view.findViewById(R.id.textView_list_chek);
+            checkImage.setImageResource(check_item.getPicture());
+            checkText.setText(check_item.getTitle());
+            return super.getView(position, convertView, parent);
         }
     }
 
+    public class Check_Item{
+        int picture;
+        String title;
+
+        public Check_Item() { }
+
+        public Check_Item(int picture, String title) {
+            this.picture = picture;
+            this.title = title;
+        }
+
+        public int getPicture() {
+            return picture;
+        }
+
+        public void setPicture(int picture) {
+            this.picture = picture;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+    }
 }

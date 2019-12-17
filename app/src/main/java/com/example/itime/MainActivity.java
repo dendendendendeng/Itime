@@ -1,6 +1,8 @@
 package com.example.itime;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -34,6 +36,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -58,8 +61,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        textView_time = (TextView) findViewById(R.id.textView_time2);
         textView_test = (TextView) findViewById(R.id.textView_test_intent);
         imageView_test = (ImageView) findViewById(R.id.image_test_intent);
+        listView = (ListView) findViewById(R.id.list_view_main);
 
         //右下角按钮点击事件,这时的添加默认是添加到最低行，所以没有传输位置信息过去
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -72,7 +77,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        listView = findViewById(R.id.list_view_main);
         //listview点击事件，这时是对特定行进行修改，必须传行的序号过去进行标识
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -95,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener((NavigationView.OnNavigationItemSelectedListener) this);
 
-        /*
+        /*不知道干嘛的，原本就有，不敢动
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
@@ -107,8 +111,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
          */
-
-        textView_time = (TextView) findViewById(R.id.textView_time2);
 
         //显示倒计时
         downTimer = new CountDownTimer(14*30*24*60*60*1000,1000) {
@@ -163,9 +165,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Toast.makeText(this,"回到主页面",Toast.LENGTH_SHORT).show();
                     Bundle bundle =  data.getExtras();
                     MyTime myTime = (MyTime)bundle.getSerializable("myTime");
-                    myTimes.add(myTime);
+                    //myTimes.add(myTime);
+                    Bitmap bitmap = (Bitmap) byteToBitmap(myTime.getPicture());
                     textView_test.setText(myTime.getTitle());
-                    imageView_test.setImageBitmap(myTime.getBitmap());
+                    imageView_test.setImageBitmap(bitmap);
                     //theAdaper.notifyDataSetChanged();//适配器实时更新
                 }
                 break;
@@ -186,6 +189,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
+    //不知道干嘛的
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -193,6 +197,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+    //不知道干嘛的
     @Override
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
@@ -200,10 +205,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 || super.onSupportNavigateUp();
     }
 
+    //也不知道干嘛的
     @Override
     public boolean onNavigationItemSelected (@NonNull MenuItem menuItem){
         return false;
     }
 
+    //用来将byte数组转化为bitmap图像
+    public Bitmap byteToBitmap(byte[] data) {
+        return BitmapFactory.decodeByteArray(data, 0, data.length);
+    }
 
+    //用来将bitmap图像转化为byte数组
+    public byte[] bitmapToBytes(Bitmap bitmap) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        return baos.toByteArray();
+    }
 }
