@@ -28,7 +28,11 @@ import androidx.viewpager.widget.ViewPager;
 
 import android.view.Menu;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Timer;
@@ -36,10 +40,15 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
+    public static final int REQUST_CODE_NEW_TIME = 901;
+    public static final int REQUST_CODE_EDIT_TIME = 902;
     private AppBarConfiguration mAppBarConfiguration;
-    TextView textView_time;
+    TextView textView_time;//用于测试，后期需要删除
+    TextView textView_test;
+    ImageView imageView_test;
     CountDownTimer downTimer;
     ViewPager viewPager;
+    ListView listView;
     private ArrayList<MyTime> myTimes;
 
     @Override
@@ -49,17 +58,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //右下角按钮点击事件
+        textView_test = (TextView) findViewById(R.id.textView_test_intent);
+        imageView_test = (ImageView) findViewById(R.id.image_test_intent);
+
+        //右下角按钮点击事件,这时的添加默认是添加到最低行，所以没有传输位置信息过去
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent();
                 intent.setClass(MainActivity.this,AddActivity.class);
-                MainActivity.this.startActivity(intent);
+                MainActivity.this.startActivityForResult(intent,REQUST_CODE_NEW_TIME);
             }
         });
 
+        listView = findViewById(R.id.list_view_main);
+        //listview点击事件，这时是对特定行进行修改，必须传行的序号过去进行标识
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                MyTime myTime = myTimes.get(position);
+                Intent intent = new Intent();
+                intent.setClass(MainActivity.this,CheckActivity.class);
+                intent.putExtra("position",position);
+                intent.putExtra("myTime",myTime);
+                MainActivity.this.startActivityForResult(intent,REQUST_CODE_EDIT_TIME);
+            }
+        });
+
+        //这部分不知道干啥的。。。
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this,drawer,toolbar,R.string.nav_app_bar_open_drawer_description,R.string.navigation_drawer_close);
@@ -99,51 +126,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             //返回格式化的日期和时间
             public String formatTime(long millisecond) {
-                long day;
-                long hour;
-                long minute;
-                long second;
-
-                //获取系统当前时间
-                long time=System.currentTimeMillis();
-
-                /*
-                int year;
-                int month;
-                year = (int) ((millisecond/1000/60/60/24)/365);
-                month =  (int) (((millisecond-(365*year*24*60*60*1000))/1000/60/60/24)/30);
-                day = (int) ((millisecond-(365*year*24*60*60*1000)-(30*month*24*60*60*1000))/1000/60/60/24);
-                hour = (int) ((millisecond-(365*year*24*60*60*1000)-(30*month*24*60*60*1000)-(day*24*60*60*1000))/1000/60/60);
-                minute = (int) ((millisecond-(365*year*24*60*60*1000)-(30*month*24*60*60*1000)-(day*24*60*60*1000)-(hour*60*60*1000))/1000/60);
-                second = (int) (((millisecond-(365*year*24*60*60*1000)-(30*month*24*60*60*1000)-(day*24*60*60*1000)-(hour*60*60*1000)-(minute*1000*60))/1000)%60);
-
-                  if (year==0){
-                    if (month==0){
-                        if (day==0){
-                            if (hour==0){
-                                if (minute==0){
-                                    return second + "秒";
-                                }else {
-                                    return minute + "分" +second + "秒";
-                                }
-                            }else {
-                                return hour + "时" + minute + "分" +second + "秒";
-                            }
-                        }else {
-                            return day + "天" + hour + "时" + minute + "分" +second + "秒";
-                        }
-                    }else {
-                        return month + "月" + day + "天" + hour + "时" + minute + "分" +second + "秒";
-                    }
-                }else {
-                    return year + "年" + month + "月" + day + "天" + hour + "时" + minute + "分" +second + "秒";
-                }
-                 */
-
-                day = (long) ((millisecond)/1000/60/60/24);
-                hour = (long) ((millisecond-(day*24*60*60*1000))/1000/60/60);
-                minute = (long) ((millisecond-(day*24*60*60*1000)-(hour*60*60*1000))/1000/60);
-                second = (long) (((millisecond-(day*24*60*60*1000)-(hour*60*60*1000)-(minute*1000*60))/1000)%60);
+                long day = (long) ((millisecond)/1000/60/60/24);
+                long hour = (long) ((millisecond-(day*24*60*60*1000))/1000/60/60);
+                long minute = (long) ((millisecond-(day*24*60*60*1000)-(hour*60*60*1000))/1000/60);
+                long second = (long) (((millisecond-(day*24*60*60*1000)-(hour*60*60*1000)-(minute*1000*60))/1000)%60);
 
                 if(day==0){
                     if(hour==0){
@@ -164,10 +150,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         downTimer.start();
     }
 
+    //获取传回来的数据对页面进行更新
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        //String title = data.getIntent().getSerializableExtra("test");
+        switch (requestCode)
+        {
+            case REQUST_CODE_NEW_TIME:
+                if (resultCode==RESULT_OK){
+                    //int position=data.getIntExtra("edit_position",0);
+
+                    Toast.makeText(this,"回到主页面",Toast.LENGTH_SHORT).show();
+                    Bundle bundle =  data.getExtras();
+                    MyTime myTime = (MyTime)bundle.getSerializable("myTime");
+                    myTimes.add(myTime);
+                    textView_test.setText(myTime.getTitle());
+                    imageView_test.setImageBitmap(myTime.getBitmap());
+                    //theAdaper.notifyDataSetChanged();//适配器实时更新
+                }
+                break;
+            case REQUST_CODE_EDIT_TIME:
+                if (resultCode==RESULT_OK){
+                    MyTime backTime = (MyTime) data.getSerializableExtra("test");
+
+                    //int position=data.getIntExtra("edit_position",0);
+                    //MyTime myTime = myTimes.get(position);
+                    //myTime.setTitle(backTime.getTitle());
+                    //myTime.setTips(backTime.getTips());
+                    //myTime.setBitmap(backTime.getBitmap());
+                    //theAdaper.notifyDataSetChanged();//适配器实时更新
+                }
+                break;
+        }
+
 
     }
 

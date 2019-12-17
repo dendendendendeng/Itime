@@ -27,15 +27,20 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.FileNotFoundException;
+import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 public class AddActivity extends AppCompatActivity {
     private List<Add_item> addItemList = new ArrayList<Add_item>();//保存每一个条项里的内容
-    MyTime myTime;
+    MyTime myTime = new MyTime();
     EditText title;
     EditText tips;
     Bitmap bitmap;
+    Bitmap bitmap2;
+    Date chooseDate;
     ImageButton button_return;
     ImageButton button_confirm;
 
@@ -53,13 +58,7 @@ public class AddActivity extends AppCompatActivity {
         button_return.setOnClickListener(new View.OnClickListener() {//点击返回主页面，这时不进行数据传递
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent();
-                myTime.setTitle(title.getText().toString());
-                myTime.setTips(tips.getText().toString());
-                myTime.setBitmap(bitmap);
-                intent.putExtra("test",myTime);
-                intent.setClass(AddActivity.this,MainActivity.class);
-                AddActivity.this.startActivity(intent);
+                AddActivity.this.finish();
             }
         });
 
@@ -68,9 +67,18 @@ public class AddActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent();
-                title.setText("");
-                intent.setClass(AddActivity.this,MainActivity.class);
-                AddActivity.this.startActivity(intent);
+                myTime.setTitle(title.getText().toString());
+                myTime.setTips(tips.getText().toString());
+                myTime.setDate(chooseDate);
+                bitmap2 = Bitmap.createScaledBitmap(bitmap, 200, 150, true);
+                Log.i("wechat", "压缩后图片的大小" + (bitmap2.getByteCount() / 1024) + "KB宽度为"
+                        + bitmap2.getWidth() + "高度为" + bitmap2.getHeight());
+                myTime.setBitmap(bitmap);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("myTime",myTime);
+                intent.putExtras(bundle);
+                setResult(RESULT_OK,intent);
+                finish();
             }
         });
 
@@ -86,13 +94,19 @@ public class AddActivity extends AppCompatActivity {
                     case 0:
                         DatePickerDialog datePickerDialog = new DatePickerDialog(AddActivity.this, new DatePickerDialog.OnDateSetListener() {
                             @Override
-                            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                            public void onDateSet(DatePicker view, final int year, final int month, final int dayOfMonth) {
                                 Toast.makeText(AddActivity.this,year+" 年"+month+" 月"+dayOfMonth+" 日",Toast.LENGTH_SHORT).show();
 
                                 TimePickerDialog timePickerDialog = new TimePickerDialog(AddActivity.this, new TimePickerDialog.OnTimeSetListener() {
                                     @Override
                                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                                         Toast.makeText(AddActivity.this,hourOfDay+":"+minute,Toast.LENGTH_SHORT).show();
+                                        String chooseTime = new String(year+"年"+month+"月"+dayOfMonth+"日 "+hourOfDay+"时"+minute+"分"+0+"秒");
+                                        try {
+                                            chooseDate = (Date) simpleDateFormat.parse(String.valueOf(chooseDate));
+                                        } catch (ParseException e) {
+                                            e.printStackTrace();
+                                        }
                                     }
                                 },9,4,true);
                                 timePickerDialog.show();
@@ -130,6 +144,8 @@ public class AddActivity extends AppCompatActivity {
             ContentResolver cr = this.getContentResolver();
             try {
                 bitmap = BitmapFactory.decodeStream(cr.openInputStream(uri));
+                Log.i("wechat", "压缩前图片的大小" + (bitmap.getByteCount() / 1024 / 1024)
+                        + "M宽度为" + bitmap.getWidth() + "高度为" + bitmap.getHeight());
                 //在layout下面放置了一张背景图片imageview，用来动态改变背景
                 ImageView imageView = (ImageView) findViewById(R.id.layout_back_image);
                 /* 将Bitmap设定到ImageView */
@@ -140,6 +156,9 @@ public class AddActivity extends AppCompatActivity {
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
+
+    //规定了日期的格式
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH时mm分ss秒");
 
     private void initItem() {
         Add_item date = new Add_item(R.drawable.clock,"日期","长按使用日期计算器","wuuuu");
