@@ -135,9 +135,9 @@ public class CheckActivity extends AppCompatActivity {
     }
 
     //规定了日期的格式
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH时mm分ss秒");
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒");
 
-    public long transformTime(Date chooseTime) {
+    public long transformTime(java.util.Date chooseTime) {
         /* 当前系统时间*/
         Date date = new Date(System.currentTimeMillis());
         String time1 = simpleDateFormat.format(date);

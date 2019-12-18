@@ -8,7 +8,7 @@ import java.sql.Date;
 public class MyTime implements Serializable {
     String title;
     String tips;
-    Date date;
+    java.util.Date date;
     long repeat;
     byte[] picture;
 
@@ -30,11 +30,11 @@ public class MyTime implements Serializable {
         this.picture = picture;
     }
 
-    public Date getDate() {
+    public java.util.Date getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(java.util.Date date) {
         this.date = date;
     }
 

@@ -32,10 +32,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
-import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class AddActivity extends AppCompatActivity {
@@ -75,10 +75,11 @@ public class AddActivity extends AppCompatActivity {
                 myTime.setTitle(title.getText().toString());
                 myTime.setTips(tips.getText().toString());
                 myTime.setDate(chooseDate);
+                Log.d("AddActivity","跳转前的日期为"+chooseDate.toString());
                 bitmap2 = Bitmap.createScaledBitmap(bitmap, 200, 150, true);
                 Log.i("wechat", "压缩后图片的大小" + (bitmap2.getByteCount() / 1024) + "KB宽度为"
                         + bitmap2.getWidth() + "高度为" + bitmap2.getHeight());
-                myTime.setPicture(bitmap2Bytes(bitmap2));;
+                myTime.setPicture(bitmapToBytes(bitmap2));;
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("myTime",myTime);
                 intent.putExtras(bundle);
@@ -106,9 +107,12 @@ public class AddActivity extends AppCompatActivity {
                                     @Override
                                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                                         Toast.makeText(AddActivity.this,hourOfDay+":"+minute,Toast.LENGTH_SHORT).show();
-                                        String chooseTime = new String(year+"年"+month+"月"+dayOfMonth+"日 "+hourOfDay+"时"+minute+"分"+0+"秒");
+                                        //chooseDate = new Date(215,5,16,5,5,5);
+                                        String chooseTime = new String(year+"年"+month+"月"+dayOfMonth+"日"+hourOfDay+"时"+minute+"分"+0+"秒");
+                                        Log.d("AddActivity","格式化的日期时间字符串"+chooseTime);
                                         try {
-                                            chooseDate = (Date) simpleDateFormat.parse(String.valueOf(chooseDate));
+                                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒");
+                                            chooseDate = simpleDateFormat.parse(chooseTime);
                                         } catch (ParseException e) {
                                             e.printStackTrace();
                                         }
@@ -140,8 +144,9 @@ public class AddActivity extends AppCompatActivity {
         });
     }
 
+    //在内存里选择图片用来动态选择背景图片
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {//在内存里选择图片用来动态选择背景图片
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
 
         if (resultCode == RESULT_OK) {
             Uri uri = data.getData();
@@ -163,7 +168,7 @@ public class AddActivity extends AppCompatActivity {
     }
 
     //规定了日期的格式
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH时mm分ss秒");
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒");
 
     private void initItem() {
         Add_item date = new Add_item(R.drawable.clock,"日期","长按使用日期计算器","");
@@ -176,7 +181,7 @@ public class AddActivity extends AppCompatActivity {
         addItemList.add(tip);
     }
 
-    public byte[] bitmap2Bytes(Bitmap bitmap) {
+    public byte[] bitmapToBytes(Bitmap bitmap) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         return baos.toByteArray();
