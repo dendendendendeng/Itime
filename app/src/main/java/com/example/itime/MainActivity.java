@@ -40,10 +40,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
-import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -167,13 +167,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case REQUST_CODE_NEW_TIME:
                 if (resultCode==RESULT_OK){
                     //int position=data.getIntExtra("edit_position",0);
-
-                    Toast.makeText(this,"回到主页面",Toast.LENGTH_SHORT).show();
                     Bundle bundle =  data.getExtras();
                     MyTime myTime = (MyTime)bundle.getSerializable("myTime");
                     //myTimes.add(myTime);
                     Bitmap bitmap = (Bitmap) byteToBitmap(myTime.getPicture());
-                    Log.d("MainActivity","传值后的日期为"+myTime.getDate());
+                    Log.d("MainActivity","转化后的值为"+transformTime(myTime.getDate()));
                     //显示倒计时
                     downTimer = new CountDownTimer(transformTime(myTime.getDate()),1000) {
 
@@ -256,40 +254,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return false;
     }
 
-    //规定了日期的格式
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒");
-
     //将时间字符串转化为long型数据
     public long transformTime(java.util.Date chooseTime) {
         /* 当前系统时间*/
-        Date date = new Date(System.currentTimeMillis());
-        String time1 = simpleDateFormat.format(date);
-        String time2 = simpleDateFormat.format(chooseTime);
-        Log.d("MainActivity","transform函数里的日期为"+chooseTime.toString());
-
-        /*计算时间差*/
-        Date begin = null;
-        try {
-            begin = (Date) simpleDateFormat.parse(time1);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        Date end = null;
-        try {
-            end = (Date) simpleDateFormat.parse(time2);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        long diff = end.getTime() - begin.getTime();
-        /*计算天数*/
-        long days = diff / (1000 * 60 * 60 * 24);
-        /*计算小时*/
-        long hours = (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60);
-        /*计算分钟*/
-        long minutes = (diff % (1000 * 60 * 60)) / (1000 * 60);
-        /*计算秒*/
-        long seconds = (diff % (1000 * 60)) / 1000;
-        return diff;
+        java.util.Date date = new java.util.Date(System.currentTimeMillis());
+        long result = chooseTime.getTime() - date.getTime();
+        return result;
     }
 
     //用来将byte数组转化为bitmap图像

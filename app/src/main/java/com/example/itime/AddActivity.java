@@ -75,7 +75,6 @@ public class AddActivity extends AppCompatActivity {
                 myTime.setTitle(title.getText().toString());
                 myTime.setTips(tips.getText().toString());
                 myTime.setDate(chooseDate);
-                Log.d("AddActivity","跳转前的日期为"+chooseDate.toString());
                 bitmap2 = Bitmap.createScaledBitmap(bitmap, 200, 150, true);
                 Log.i("wechat", "压缩后图片的大小" + (bitmap2.getByteCount() / 1024) + "KB宽度为"
                         + bitmap2.getWidth() + "高度为" + bitmap2.getHeight());
@@ -101,23 +100,15 @@ public class AddActivity extends AppCompatActivity {
                         DatePickerDialog datePickerDialog = new DatePickerDialog(AddActivity.this, new DatePickerDialog.OnDateSetListener() {
                             @Override
                             public void onDateSet(DatePicker view, final int year, final int month, final int dayOfMonth) {
-                                Toast.makeText(AddActivity.this,year+" 年"+month+" 月"+dayOfMonth+" 日",Toast.LENGTH_SHORT).show();
+                                Toast.makeText(AddActivity.this,"你选择了"+year+" 年"+month+" 月"+dayOfMonth+" 日",Toast.LENGTH_SHORT).show();
 
                                 TimePickerDialog timePickerDialog = new TimePickerDialog(AddActivity.this, new TimePickerDialog.OnTimeSetListener() {
                                     @Override
                                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                        Toast.makeText(AddActivity.this,hourOfDay+":"+minute,Toast.LENGTH_SHORT).show();
-                                        //chooseDate = new Date(215,5,16,5,5,5);
-                                        String chooseTime = new String(year+"年"+month+"月"+dayOfMonth+"日"+hourOfDay+"时"+minute+"分"+0+"秒");
-                                        Log.d("AddActivity","格式化的日期时间字符串"+chooseTime);
-                                        try {
-                                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒");
-                                            chooseDate = simpleDateFormat.parse(chooseTime);
-                                        } catch (ParseException e) {
-                                            e.printStackTrace();
-                                        }
+                                        Toast.makeText(AddActivity.this,"你选择的时间是"+hourOfDay+":"+minute,Toast.LENGTH_SHORT).show();
+                                        chooseDate = new Date(year-1900,month,dayOfMonth,hourOfDay,minute,0);
                                     }
-                                },9,4,true);
+                                },9,0,true);
                                 timePickerDialog.show();
                             }
                         },2019,11,25);
@@ -166,9 +157,6 @@ public class AddActivity extends AppCompatActivity {
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
-
-    //规定了日期的格式
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒");
 
     private void initItem() {
         Add_item date = new Add_item(R.drawable.clock,"日期","长按使用日期计算器","");
