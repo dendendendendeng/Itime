@@ -1,9 +1,11 @@
 package com.example.itime;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -48,6 +50,8 @@ public class AddActivity extends AppCompatActivity {
     Date chooseDate;
     ImageButton button_return;
     ImageButton button_confirm;
+    ImageView imageView;
+    int Position;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,8 +60,8 @@ public class AddActivity extends AppCompatActivity {
 
         title =(EditText) findViewById(R.id.editText_add_title);
         tips =(EditText) findViewById(R.id.editText_add_comment);
-
-        final Intent myItennt = getIntent();//从主页面跳转过来
+        //在layout下面放置了一张背景图片imageview，用来动态改变背景
+        imageView = (ImageView) findViewById(R.id.layout_back_image);
 
         button_return = (ImageButton) findViewById(R.id.imageButton_return);
         button_return.setOnClickListener(new View.OnClickListener() {//点击返回主页面，这时不进行数据传递
@@ -78,11 +82,16 @@ public class AddActivity extends AppCompatActivity {
                 bitmap2 = Bitmap.createScaledBitmap(bitmap, 800, 600, true);
                 Log.i("wechat", "压缩后图片的大小" + (bitmap2.getByteCount() / 1024) + "KB宽度为"
                         + bitmap2.getWidth() + "高度为" + bitmap2.getHeight());
-                myTime.setPicture(bitmapToBytes(bitmap2));;
+                myTime.setPicture(bitmapToBytes(bitmap2));
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("myTime",myTime);
                 intent.putExtras(bundle);
-                setResult(RESULT_OK,intent);
+                if (Position!=-1){
+                    intent.putExtra("check_position",Position);
+                    setResult(RESULT_FIRST_USER,intent);
+                }else {
+                    setResult(RESULT_OK,intent);
+                }
                 finish();
             }
         });
@@ -115,7 +124,32 @@ public class AddActivity extends AppCompatActivity {
                         datePickerDialog.show();
                         break;
                     case 1:
-                        Toast.makeText(AddActivity.this,"你点击了第 "+(position+1)+" 个",Toast.LENGTH_SHORT).show();
+                        new AlertDialog.Builder(AddActivity.this)
+                                .setTitle("周期")
+                                .setItems(new String[]{"无", "每天", "每周", "每月", "每年"},null /*new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        TextView subText = (TextView) findViewById(R.id.textView_sub_list_main);
+                                        switch (which){
+                                            case 0:
+                                                subText.setText("无");
+                                                break;
+                                            case 1:
+                                                subText.setText("每天");
+                                                break;
+                                            case 2:
+                                                subText.setText("每周");
+                                                break;
+                                            case 3:
+                                                subText.setText("每月");
+                                                break;
+                                            case 4:
+                                                subText.setText("每年");
+                                                break;
+                                        }
+                                    }
+                                }*/)
+                                .show();
                         break;
                     case 2:
                         Intent intent = new Intent();
@@ -133,6 +167,18 @@ public class AddActivity extends AppCompatActivity {
                 }
             }
         });
+
+        Position = getIntent().getIntExtra("check_position",-1);
+        if (Position != -1){
+            Bundle bundle = new Bundle();
+            bundle = getIntent().getExtras();
+            myTime =(MyTime) bundle.getSerializable("myTime");
+            title.setText(myTime.getTitle());
+            if(myTime.getTips()!=null){
+                tips.setText(myTime.getTips());
+            }
+            imageView.setImageBitmap(byteToBitmap(myTime.getPicture()));
+        }
     }
 
     //在内存里选择图片用来动态选择背景图片
@@ -147,8 +193,6 @@ public class AddActivity extends AppCompatActivity {
                 bitmap = BitmapFactory.decodeStream(cr.openInputStream(uri));
                 Log.i("wechat", "压缩前图片的大小" + (bitmap.getByteCount() / 1024 / 1024)
                         + "M宽度为" + bitmap.getWidth() + "高度为" + bitmap.getHeight());
-                //在layout下面放置了一张背景图片imageview，用来动态改变背景
-                ImageView imageView = (ImageView) findViewById(R.id.layout_back_image);
                 /* 将Bitmap设定到ImageView */
                imageView.setImageBitmap(bitmap);
             } catch (FileNotFoundException e) {
@@ -175,6 +219,11 @@ public class AddActivity extends AppCompatActivity {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         return baos.toByteArray();
+    }
+
+    //用来将byte数组转化为bitmap图像
+    public Bitmap byteToBitmap(byte[] data) {
+        return BitmapFactory.decodeByteArray(data, 0, data.length);
     }
 
     public class Add_item {

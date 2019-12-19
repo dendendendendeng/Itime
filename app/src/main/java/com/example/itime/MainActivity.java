@@ -63,7 +63,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ArrayList<MyTime> myTimes;
     MyViewPagerAdapter myViewPageradapter;
     MainListAdapter mainListAdapter;
-    private int item_init = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,7 +81,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         viewPager=findViewById(R.id.view_pager_main);
         myViewPageradapter = new MyViewPagerAdapter(arrayList_view);
         viewPager.setAdapter(myViewPageradapter);
-        myViewPageradapter.notifyDataSetChanged();
 
         //右下角按钮点击事件,这时的添加默认是添加到最低行，所以没有传输位置信息过去
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -124,31 +122,50 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode)
-        {
-            case REQUST_CODE_NEW_TIME:
-                if (resultCode==RESULT_OK){
-                    //int position=data.getIntExtra("edit_position",0);
-                    Bundle bundle =  data.getExtras();
+        if (resultCode == RESULT_OK){
+            switch (requestCode)
+            {
+                case REQUST_CODE_NEW_TIME:
+                        //int position=data.getIntExtra("edit_position",0);
+                        Bundle bundle =  data.getExtras();
+                        MyTime myTime = (MyTime)bundle.getSerializable("myTime");
+                        myTimes.add(myTime);
+                        Init();
+                        myViewPageradapter.notifyDataSetChanged();
+                        mainListAdapter.notifyDataSetChanged();
+                    break;
+            }
+        }else  if (resultCode == RESULT_CANCELED){
+            switch (requestCode){
+                case REQUST_CODE_EDIT_TIME:
+                    int Position = data.getIntExtra("delete",-1);
+                    if (Position != -1){
+                        myTimes.remove(Position);
+                        Init();
+                        mainListAdapter.notifyDataSetChanged();
+                        myViewPageradapter.notifyDataSetChanged();
+                    }
+            }
+        }else if (resultCode == RESULT_FIRST_USER){
+            switch (requestCode){
+                case REQUST_CODE_EDIT_TIME:
+                    //传回修改的数据对页面信息更新
+                    int Position = data.getIntExtra("check_position",-1);
+                    Bundle bundle = data.getExtras();
                     MyTime myTime = (MyTime)bundle.getSerializable("myTime");
-                    myTimes.add(myTime);
+                    Log.d("测试修改后传回来主页面的数据",myTime.getTitle());
+                    myTimes.get(Position).setDate(myTime.getDate());
+                    myTimes.get(Position).setTitle(myTime.getTitle());
+                    myTimes.get(Position).setTips(myTime.getTips());
+                    myTimes.get(Position).setPicture(myTime.getPicture());
+                    myTimes.get(Position).setRepeat(myTime.getRepeat());
+                    Init();
                     myViewPageradapter.notifyDataSetChanged();
                     mainListAdapter.notifyDataSetChanged();
-                }
-                break;
-            case REQUST_CODE_EDIT_TIME:
-                if (resultCode==RESULT_OK){
-                    MyTime backTime = (MyTime) data.getSerializableExtra("test");
-
-                    //int position=data.getIntExtra("edit_position",0);
-                    //MyTime myTime = myTimes.get(position);
-                    //myTime.setTitle(backTime.getTitle());
-                    //myTime.setTips(backTime.getTips());
-                    //myTime.setBitmap(backTime.getBitmap());
-                    //theAdaper.notifyDataSetChanged();//适配器实时更新
-                }
-                break;
+                    break;
+            }
         }
+
 
 
     }
@@ -244,6 +261,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     //初始化viewpager
     private void Init(){
+        arrayList_view.clear();
+        int item_init = 0;
             if(myTimes.size()!=0)
                 while(item_init<myTimes.size())
                 {

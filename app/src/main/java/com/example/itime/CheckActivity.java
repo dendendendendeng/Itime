@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.StringTokenizer;
 
+import static com.example.itime.MainActivity.REQUST_CODE_EDIT_TIME;
+
 public class CheckActivity extends AppCompatActivity {
     List<Check_Item> check_items = new ArrayList<Check_Item>();
     ListView listView;
@@ -105,7 +107,7 @@ public class CheckActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 new AlertDialog.Builder(CheckActivity.this)
-                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setIcon(R.drawable.alarm)
                         .setTitle("询问")
                         .setMessage("你确定要删除这个事项吗？")
                         .setPositiveButton("确定", new DialogInterface.OnClickListener() {
@@ -113,10 +115,9 @@ public class CheckActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 //这里应该传递一个intent回去，在主页面进行操作，对myTimes进行删除更新
                                 Intent intent = new Intent(CheckActivity.this,MainActivity.class);
+                                intent.putExtra("delete",position);
+                                setResult(RESULT_CANCELED,intent);
                                 finish();
-                                //theGoods.remove(itemPosition);
-                                //heAdaper.notifyDataSetChanged();
-                                //Toast.makeText(LifePriceMainActivity.this, "删除成功！", Toast.LENGTH_SHORT).show();
                             }
                         })
                         .setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -133,7 +134,12 @@ public class CheckActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent_return = new Intent(CheckActivity.this,MainActivity.class);
-                startActivity(intent_return);
+                Bundle bundle = new Bundle();
+                intent_return.putExtra("check_position",position);
+                bundle.putSerializable("myTime",myTime);
+                Log.d("测试修改后传出去主页面的数据",myTime.getTitle());
+                intent_return.putExtras(bundle);
+                setResult(RESULT_FIRST_USER,intent_return);
                 finish();
             }
         });
@@ -141,9 +147,13 @@ public class CheckActivity extends AppCompatActivity {
         button_edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent_edit = new Intent(CheckActivity.this,AddActivity.class);
-                startActivity(intent_edit);
-                finish();
+                Intent intent = new Intent();
+                intent.setClass(CheckActivity.this,AddActivity.class);
+                Bundle bundle = new Bundle();
+                intent.putExtra("check_position",position);
+                bundle.putSerializable("myTime",myTime);
+                intent.putExtras(bundle);
+                startActivityForResult(intent,REQUST_CODE_EDIT_TIME);
             }
         });
 
@@ -269,6 +279,52 @@ public class CheckActivity extends AppCompatActivity {
 
         public void setTitle(String title) {
             this.title = title;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_FIRST_USER){
+            Bundle bundle = data.getExtras();
+            position = data.getIntExtra("check_position",0);
+            myTime = (MyTime) bundle.getSerializable("myTime");
+            imageView_check.setImageBitmap(byteToBitmap(myTime.getPicture()));
+            title.setText(myTime.getTitle());
+            date.setText(SplitDateString(simpleDateFormat.format(myTime.getDate()),"日"));
+            CountDownTimer countDownTimer = new CountDownTimer(transformTime(myTime.getDate()),1000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    time.setText(formatTime(millisUntilFinished));
+                }
+                //倒计时结束后的操作
+                @Override
+                public void onFinish() {
+                    time.setText("");
+                }
+                //返回格式化的日期和时间
+                public String formatTime(long millisecond) {
+                    long day = (long) ((millisecond)/1000/60/60/24);
+                    long hour = (long) ((millisecond-(day*24*60*60*1000))/1000/60/60);
+                    long minute = (long) ((millisecond-(day*24*60*60*1000)-(hour*60*60*1000))/1000/60);
+                    long second = (long) (((millisecond-(day*24*60*60*1000)-(hour*60*60*1000)-(minute*1000*60))/1000)%60);
+
+                    if(day==0){
+                        if(hour==0){
+                            if (minute==0){
+                                return second + "秒";
+                            }else {
+                                return minute + "分" + second + "秒";
+                            }
+                        }else {
+                            return hour+"时" + minute + "分" + second + "秒";
+                        }
+                    }else {
+                        return day + "天" + hour + "时" + minute + "分" + second + "秒";
+                    }
+                }
+            };
+            countDownTimer.start();
         }
     }
 }
