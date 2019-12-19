@@ -1,4 +1,4 @@
-package com.example.itime.ui.home;
+package com.example.itime.home;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;

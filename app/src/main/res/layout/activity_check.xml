@@ -20,17 +20,17 @@
 
     <ListView
         android:id="@+id/listView_item_check"
-        android:layout_width="match_parent"
-        android:layout_height="485dp"
+        android:layout_width="407dp"
+        android:layout_height="429dp"
+        android:layout_below="@+id/imageview_check"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginEnd="0dp"
-        android:layout_marginRight="0dp"
-        android:layout_marginBottom="2dp" />
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="1dp"
+        android:layout_marginRight="1dp" />
 
     <ImageButton
-        android:id="@+id/Button_return_check"
+        android:id="@+id/button_return_check"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
@@ -69,44 +69,44 @@
         android:id="@+id/textView_title_check"
         android:layout_width="149dp"
         android:layout_height="54dp"
-        android:textStyle="bold"
-        android:textSize="15dp"
-        android:gravity="center"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_marginStart="134dp"
-        android:layout_marginLeft="134dp"
-        android:layout_marginTop="31dp"
-        android:text="TextView" />
+        android:layout_marginStart="104dp"
+        android:layout_marginLeft="104dp"
+        android:layout_marginTop="45dp"
+        android:gravity="center"
+        android:text="TextView"
+        android:textSize="20dp"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/textView_date_check"
-        android:layout_width="215dp"
-        android:layout_height="42dp"
+        android:layout_width="231dp"
+        android:layout_height="45dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_marginStart="98dp"
-        android:layout_marginLeft="98dp"
+        android:layout_marginStart="82dp"
+        android:layout_marginLeft="82dp"
         android:layout_marginTop="101dp"
         android:gravity="center"
         android:text="TextView"
-        android:textSize="15dp"
+        android:textSize="20dp"
         android:textStyle="bold" />
 
     <TextView
         android:id="@+id/textView_time_check"
-        android:layout_width="230dp"
-        android:layout_height="32dp"
-        android:textStyle="bold"
-        android:textSize="15dp"
-        android:gravity="center"
+        android:layout_width="273dp"
+        android:layout_height="39dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
+        android:layout_marginStart="47dp"
+        android:layout_marginLeft="47dp"
         android:layout_marginTop="160dp"
-        android:layout_marginEnd="91dp"
-        android:layout_marginRight="91dp"
-        android:text="TextView" />
+        android:gravity="center"
+        android:text="TextView"
+        android:textSize="20dp"
+        android:textStyle="bold" />
 </RelativeLayout>

@@ -75,7 +75,7 @@ public class AddActivity extends AppCompatActivity {
                 myTime.setTitle(title.getText().toString());
                 myTime.setTips(tips.getText().toString());
                 myTime.setDate(chooseDate);
-                bitmap2 = Bitmap.createScaledBitmap(bitmap, 200, 150, true);
+                bitmap2 = Bitmap.createScaledBitmap(bitmap, 800, 600, true);
                 Log.i("wechat", "压缩后图片的大小" + (bitmap2.getByteCount() / 1024) + "KB宽度为"
                         + bitmap2.getWidth() + "高度为" + bitmap2.getHeight());
                 myTime.setPicture(bitmapToBytes(bitmap2));;
@@ -158,6 +158,7 @@ public class AddActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    //初始化listview内容
     private void initItem() {
         Add_item date = new Add_item(R.drawable.clock,"日期","长按使用日期计算器","");
         addItemList.add(date);
@@ -169,6 +170,7 @@ public class AddActivity extends AppCompatActivity {
         addItemList.add(tip);
     }
 
+    //将bitmap图片转化为byte数组，便于序列化
     public byte[] bitmapToBytes(Bitmap bitmap) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);

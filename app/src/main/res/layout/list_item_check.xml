@@ -27,7 +27,7 @@
         android:layout_marginLeft="82dp"
         android:layout_marginTop="9dp"
         android:text="TextView"
-        android:textSize="25dp"
+        android:textSize="20dp"
         android:textStyle="bold"/>
 
     <Switch
