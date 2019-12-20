@@ -47,7 +47,7 @@ public class CheckActivity extends AppCompatActivity {
     ImageView imageView_check;
     private int position;
     private MyTime myTime;
-    CountDownTimer countDownTimer;
+    CountDownTimer countDownTimer_check;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -69,7 +69,7 @@ public class CheckActivity extends AppCompatActivity {
         imageView_check.setImageBitmap(byteToBitmap(myTime.getPicture()));
         title.setText(myTime.getTitle());
         date.setText(SplitDateString(simpleDateFormat.format(myTime.getDate()),"日"));
-        CountDownTimer countDownTimer = new CountDownTimer(transformTime(myTime.getDate()),1000) {
+        countDownTimer_check = new CountDownTimer(transformTime(myTime.getDate()),1000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 time.setText(formatTime(millisUntilFinished));
@@ -101,7 +101,7 @@ public class CheckActivity extends AppCompatActivity {
                 }
             }
         };
-        countDownTimer.start();
+        countDownTimer_check.start();
 
         button_delete.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -163,12 +163,11 @@ public class CheckActivity extends AppCompatActivity {
         listView.setAdapter(arrayAdapter);
 
         //倒计时
-        countDownTimer = new CountDownTimer(transformTime(myTime.getDate()),1000) {
+        countDownTimer_check = new CountDownTimer(transformTime(myTime.getDate()),1000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 time.setText(formatTime(millisUntilFinished));
             }
-
             @Override
             public void onFinish() {
                 time.setText("00:00");
@@ -292,7 +291,8 @@ public class CheckActivity extends AppCompatActivity {
             imageView_check.setImageBitmap(byteToBitmap(myTime.getPicture()));
             title.setText(myTime.getTitle());
             date.setText(SplitDateString(simpleDateFormat.format(myTime.getDate()),"日"));
-            CountDownTimer countDownTimer = new CountDownTimer(transformTime(myTime.getDate()),1000) {
+            countDownTimer_check.cancel();
+            countDownTimer_check = new CountDownTimer(transformTime(myTime.getDate()),1000) {
                 @Override
                 public void onTick(long millisUntilFinished) {
                     time.setText(formatTime(millisUntilFinished));
@@ -324,7 +324,8 @@ public class CheckActivity extends AppCompatActivity {
                     }
                 }
             };
-            countDownTimer.start();
+            countDownTimer_check.start();
+            Log.d("新测试倒计时开始",countDownTimer_check.toString());
         }
     }
 }

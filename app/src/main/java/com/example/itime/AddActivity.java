@@ -177,7 +177,12 @@ public class AddActivity extends AppCompatActivity {
             if(myTime.getTips()!=null){
                 tips.setText(myTime.getTips());
             }
+            bitmap = byteToBitmap(myTime.getPicture());
+            chooseDate = myTime.getDate();
             imageView.setImageBitmap(byteToBitmap(myTime.getPicture()));
+        }else {
+            chooseDate = new Date(System.currentTimeMillis());
+            bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.cat_man);
         }
     }
 
