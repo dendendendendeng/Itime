@@ -9,6 +9,15 @@ import java.util.ArrayList;
 
 public class FileDataSource {
     private Context context;
+    private int color;
+
+    public int getColor() {
+        return color;
+    }
+
+    public void setColor(int color) {
+        this.color = color;
+    }
 
     public FileDataSource(Context context) {
         this.context = context;
@@ -46,4 +55,28 @@ public class FileDataSource {
         return myTimes;
     }
 
+    public void saveColor(){
+        try {
+            ObjectOutputStream outputStream = new ObjectOutputStream(
+                    context.openFileOutput("Color.txt",Context.MODE_PRIVATE)
+            );
+            outputStream.writeObject(color);
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public int loadColor() {
+        try{
+            ObjectInputStream inputStream = new ObjectInputStream(
+                    context.openFileInput("Color.txt")
+            );
+            color = (int) inputStream.readObject();
+            inputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return color;
+    }
 }

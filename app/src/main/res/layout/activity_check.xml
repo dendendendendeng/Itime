@@ -14,7 +14,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginStart="0dp"
         android:layout_marginLeft="0dp"
-        android:layout_marginTop="0dp"
+        android:layout_marginTop="-2dp"
         app:srcCompat="@drawable/side_nav_bar"
         tools:srcCompat="@drawable/ic_launcher_background" />
 

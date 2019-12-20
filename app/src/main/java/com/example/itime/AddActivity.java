@@ -58,10 +58,16 @@ public class AddActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add);
 
-        title =(EditText) findViewById(R.id.editText_add_title);
-        tips =(EditText) findViewById(R.id.editText_add_comment);
         //在layout下面放置了一张背景图片imageview，用来动态改变背景
         imageView = (ImageView) findViewById(R.id.layout_back_image);
+        int color = getIntent().getIntExtra("color",0);
+        Log.d("测试传输过来的颜色 ",color+"号");
+        if (color!=0){
+            imageView.setBackgroundColor(color);
+        }
+
+        title =(EditText) findViewById(R.id.editText_add_title);
+        tips =(EditText) findViewById(R.id.editText_add_comment);
 
         button_return = (ImageButton) findViewById(R.id.imageButton_return);
         button_return.setOnClickListener(new View.OnClickListener() {//点击返回主页面，这时不进行数据传递

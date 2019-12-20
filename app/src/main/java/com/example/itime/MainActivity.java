@@ -1,9 +1,12 @@
 package com.example.itime;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -19,6 +22,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -38,6 +42,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -63,12 +68,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ArrayList<MyTime> myTimes;
     MyViewPagerAdapter myViewPageradapter;
     MainListAdapter mainListAdapter;
+    ColorInt color = new ColorInt(0);
+    DrawerLayout drawer;
+    FloatingActionButton fab;
+    Toolbar toolbar;
+    NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         InitData();
@@ -83,11 +93,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         viewPager.setAdapter(myViewPageradapter);
 
         //右下角按钮点击事件,这时的添加默认是添加到最低行，所以没有传输位置信息过去
-        FloatingActionButton fab = findViewById(R.id.fab);
+        fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent();
+                intent.putExtra("color",color.getColor());
                 intent.setClass(MainActivity.this,AddActivity.class);
                 MainActivity.this.startActivityForResult(intent,REQUST_CODE_NEW_TIME);
             }
@@ -109,13 +120,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         //这部分不知道干啥的。。。
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this,drawer,toolbar,R.string.nav_app_bar_open_drawer_description,R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener((NavigationView.OnNavigationItemSelectedListener) this);
+        navigationView.getMenu().getItem(3).setOnMenuItemClickListener(new ShowColorBarListener());
+
+
+        if (color.getColor()!= 0){
+            toolbar.setBackgroundColor(color.getColor());
+            fab.setBackgroundTintList(ColorStateList.valueOf(color.getColor()));
+        }
     }
 
     //获取传回来的数据对页面进行更新
@@ -165,9 +183,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     break;
             }
         }
-
-
-
     }
 
     //不知道干嘛的
@@ -385,20 +400,62 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //保存数据
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
+        fileDataSource.setColor(color.getColor());
         super.onSaveInstanceState(outState);
         fileDataSource.save();
+        fileDataSource.saveColor();
     }
 
     //保存数据
     @Override
     protected void onPause() {
+        fileDataSource.setColor(color.getColor());
         super.onPause();
         fileDataSource.save();
+        fileDataSource.saveColor();
     }
 
     //打开app后获取之前的数据
     private void InitData() {
         fileDataSource=new FileDataSource(this);
         myTimes=fileDataSource.load();
+        color.setColor(fileDataSource.loadColor());
+    }
+
+    private class ShowColorBarListener implements MenuItem.OnMenuItemClickListener{
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            final int colorOld = color.getColor();
+            final Dialog dialog;
+            final LayoutInflater inflater=LayoutInflater.from(MainActivity.this);
+            final View myview=inflater.inflate(R.layout.color_choose_layout,null);//引用自定义布局
+            AlertDialog.Builder builder=new AlertDialog.Builder(MainActivity.this);
+            builder.setView( myview );
+            dialog=builder.create();//创建对话框
+            dialog.show();//显示对话框
+            final ColorBar colorBar = myview.findViewById(R.id.ColorBar_show);
+            colorBar.setOnView(toolbar,fab,color);
+            Button buttonOk = myview.findViewById(R.id.button_color_ok);
+            Button buttonQuit = myview.findViewById(R.id.button_color_cancel);
+
+            buttonQuit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    color.setColor(colorOld);
+                    toolbar.setBackgroundColor(color.getColor());
+                    fab.setBackgroundTintList(ColorStateList.valueOf(color.getColor()));
+                    dialog.dismiss();
+                }
+            });
+            buttonOk.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.dismiss();
+                }
+            });
+
+            drawer.closeDrawers();
+            return false;
+        }
     }
 }
