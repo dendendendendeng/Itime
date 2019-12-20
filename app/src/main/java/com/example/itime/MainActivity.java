@@ -43,7 +43,9 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -65,7 +67,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ArrayList<View> arrayList_view = new ArrayList<View>();
     ListView listView;
     FileDataSource fileDataSource;
-    private ArrayList<MyTime> myTimes;
+    private ArrayList<MyTime> myTimes = new ArrayList<MyTime>();
+    public static ArrayList<String> Labels = new ArrayList<String>();
     MyViewPagerAdapter myViewPageradapter;
     MainListAdapter mainListAdapter;
     ColorInt color = new ColorInt(0);
@@ -73,6 +76,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     FloatingActionButton fab;
     Toolbar toolbar;
     NavigationView navigationView;
+    int ItemID = 1;
+    int temp = 0;//用于遍历
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mainListAdapter = new MainListAdapter(this,R.layout.list_item_main,myTimes);
         listView.setAdapter(mainListAdapter);
 
-        Init();
+        InitViewPager();
         viewPager=findViewById(R.id.view_pager_main);
         myViewPageradapter = new MyViewPagerAdapter(arrayList_view);
         viewPager.setAdapter(myViewPageradapter);
@@ -127,6 +132,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toggle.syncState();
         navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener((NavigationView.OnNavigationItemSelectedListener) this);
+        navigationView.getMenu().getItem(1).setOnMenuItemClickListener(new AddLableListenr());
+        navigationView.getMenu().getItem(2).setOnMenuItemClickListener(new DeleteLabelListenter());
         navigationView.getMenu().getItem(3).setOnMenuItemClickListener(new ShowColorBarListener());
 
 
@@ -148,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         Bundle bundle =  data.getExtras();
                         MyTime myTime = (MyTime)bundle.getSerializable("myTime");
                         myTimes.add(myTime);
-                        Init();
+                        InitViewPager();
                         myViewPageradapter.notifyDataSetChanged();
                         mainListAdapter.notifyDataSetChanged();
                     break;
@@ -159,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     int Position = data.getIntExtra("delete",-1);
                     if (Position != -1){
                         myTimes.remove(Position);
-                        Init();
+                        InitViewPager();
                         mainListAdapter.notifyDataSetChanged();
                         myViewPageradapter.notifyDataSetChanged();
                     }
@@ -177,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     myTimes.get(Position).setTips(myTime.getTips());
                     myTimes.get(Position).setPicture(myTime.getPicture());
                     myTimes.get(Position).setRepeat(myTime.getRepeat());
-                    Init();
+                    InitViewPager();
                     myViewPageradapter.notifyDataSetChanged();
                     mainListAdapter.notifyDataSetChanged();
                     break;
@@ -275,7 +282,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
     //初始化viewpager
-    private void Init(){
+    private void InitViewPager(){
         arrayList_view.clear();
         int item_init = 0;
             if(myTimes.size()!=0)
@@ -402,8 +409,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         fileDataSource.setColor(color.getColor());
         super.onSaveInstanceState(outState);
-        fileDataSource.save();
+        fileDataSource.saveMyTimes();
         fileDataSource.saveColor();
+        fileDataSource.saveLabels();
     }
 
     //保存数据
@@ -411,18 +419,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onPause() {
         fileDataSource.setColor(color.getColor());
         super.onPause();
-        fileDataSource.save();
+        fileDataSource.saveMyTimes();
         fileDataSource.saveColor();
+        fileDataSource.saveLabels();
     }
 
     //打开app后获取之前的数据
     private void InitData() {
         fileDataSource=new FileDataSource(this);
-        myTimes=fileDataSource.load();
+        myTimes=fileDataSource.loadMyTimes();
         color.setColor(fileDataSource.loadColor());
+        Labels= fileDataSource.loadLabels();
     }
 
-    private class ShowColorBarListener implements MenuItem.OnMenuItemClickListener{
+    public class ShowColorBarListener implements MenuItem.OnMenuItemClickListener{
         @Override
         public boolean onMenuItemClick(MenuItem item) {
             final int colorOld = color.getColor();
@@ -455,6 +465,120 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             });
 
             drawer.closeDrawers();
+            return false;
+        }
+    }
+
+    //删除标签监听器
+    public class DeleteLabelListenter implements MenuItem.OnMenuItemClickListener{
+
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            final Dialog dialog;
+            final LayoutInflater inflater=LayoutInflater.from(MainActivity.this);
+            final View myview=inflater.inflate(R.layout.layout_label_delete,null);//引用自定义布局
+            android.app.AlertDialog.Builder builder=new android.app.AlertDialog.Builder(MainActivity.this);
+            builder.setView( myview );
+            dialog=builder.create();//创建对话框
+            dialog.show();//显示对话框
+            final EditText input = myview.findViewById(R.id.editText_label_add);
+            myview.findViewById(R.id.button_label_delete).setOnClickListener(new View.OnClickListener() {//获取布局里面按钮
+                @Override
+                public void onClick(View v) {
+                    dialog.dismiss();//点击按钮对话框消失
+                }
+            } );
+            LinearLayout linearLayout = myview.findViewById(R.id.LinearLayout_label_delete);
+            temp = 0;
+            while (temp<Labels.size()){
+                final Button button_label = new Button(MainActivity.this);
+                button_label.setText(Labels.get(temp));
+                button_label.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                linearLayout.addView(button_label);
+                TextView textView = new TextView(MainActivity.this);
+                textView.setText(" ");
+                textView.setTextSize(20);
+                linearLayout.addView(textView);
+                button_label.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Labels.remove(temp-1);
+                        deleteLabelInTime(button_label.getText().toString());
+                        dialog.dismiss();
+                    }
+                });
+                temp++;
+            }
+            return false;
+        }
+    }
+    private void deleteLabelInTime(String Label){//删除标签后把相关的myTime的标签值对应为空
+        int i = 0;
+        while(i<myTimes.size()){
+            if (Label.equals(myTimes.get(i).getLabel())){
+                myTimes.get(i).setLabel("");
+            }
+            i++;
+        }
+    }
+
+    //查看以及添加页面的监听器
+    public class AddLableListenr implements MenuItem.OnMenuItemClickListener{
+
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            final Dialog dialog;
+            final LayoutInflater inflater=LayoutInflater.from(MainActivity.this);
+            final View myview=inflater.inflate(R.layout.layout_label_add,null);//引用自定义布局
+            android.app.AlertDialog.Builder builder=new android.app.AlertDialog.Builder(MainActivity.this);
+            builder.setView( myview );
+            dialog=builder.create();//创建对话框
+            dialog.show();//显示对话框
+            final EditText input = myview.findViewById(R.id.editText_label_add);
+            myview.findViewById(R.id.button_label_add_return).setOnClickListener(new View.OnClickListener() {//获取布局里面按钮
+                @Override
+                public void onClick(View v) {
+                    dialog.dismiss();//点击按钮对话框消失
+                }
+            } );
+            LinearLayout linearLayout = myview.findViewById(R.id.layout_label_check_add);
+
+            //加载已经存在的标签
+            temp = 0;
+            while (temp<Labels.size()){
+                final Button button_label = new Button(MainActivity.this);
+                button_label.setText(Labels.get(temp));
+                button_label.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                linearLayout.addView(button_label);
+                TextView textView = new TextView(MainActivity.this);
+                textView.setText(" ");
+                textView.setTextSize(20);
+                linearLayout.addView(textView);
+                temp++;
+            }
+
+            //添加新标签
+            myview.findViewById(R.id.button_label_add_comfirm).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(input.getText().toString().trim().isEmpty())
+                        Toast.makeText(MainActivity.this, "不能输入空标签", Toast.LENGTH_SHORT).show();
+                    else{
+                        boolean alive = true;
+                        for (int t = 0;t<Labels.size();t++){//遍历找出要新建的标签是否已经存在
+                            if (input.getText().toString().equals(Labels.get(t))){
+                                alive = false;
+                            }
+                        }
+                        if (alive == true){
+                            Labels.add(input.getText().toString());
+                        }else {
+                            Toast.makeText(MainActivity.this, "该标签已存在", Toast.LENGTH_SHORT).show();
+                        }
+                        dialog.dismiss();
+                    }
+                }
+            });
             return false;
         }
     }

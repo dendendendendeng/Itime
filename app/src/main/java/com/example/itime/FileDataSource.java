@@ -9,7 +9,17 @@ import java.util.ArrayList;
 
 public class FileDataSource {
     private Context context;
-    private int color;
+    private int color = 0;
+    private ArrayList<String> Labels = new ArrayList<String>();
+    private ArrayList<MyTime> myTimes = new ArrayList<MyTime>();
+
+    public ArrayList<String> getLabels() {
+        return Labels;
+    }
+
+    public void setLabels(ArrayList<String> labels) {
+        Labels = labels;
+    }
 
     public int getColor() {
         return color;
@@ -23,13 +33,11 @@ public class FileDataSource {
         this.context = context;
     }
 
-    private ArrayList<MyTime> myTimes = new ArrayList<MyTime>();
-
     public ArrayList<MyTime> getTimes(){
         return myTimes;
     }
 
-    public void  save(){
+    public void  saveMyTimes(){
         try {
             ObjectOutputStream outputStream = new ObjectOutputStream(
                     context.openFileOutput("Serializable.txt",Context.MODE_PRIVATE)
@@ -41,8 +49,7 @@ public class FileDataSource {
         }
     }
 
-    public ArrayList<MyTime> load(){
-
+    public ArrayList<MyTime> loadMyTimes(){
         try{
             ObjectInputStream inputStream = new ObjectInputStream(
                     context.openFileInput("Serializable.txt")
@@ -78,5 +85,31 @@ public class FileDataSource {
             e.printStackTrace();
         }
         return color;
+    }
+
+
+    public ArrayList<String> loadLabels() {
+        try{
+            ObjectInputStream inputStream = new ObjectInputStream(
+                    context.openFileInput("Labels.txt")
+            );
+            Labels = (ArrayList<String>) inputStream.readObject();
+            inputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Labels;
+    }
+
+    public void saveLabels(){
+        try {
+            ObjectOutputStream outputStream = new ObjectOutputStream(
+                    context.openFileOutput("Labels.txt",Context.MODE_PRIVATE)
+            );
+            outputStream.writeObject(Labels);
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

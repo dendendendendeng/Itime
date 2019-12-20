@@ -11,11 +11,11 @@
         <item
             android:id="@+id/nav_tips"
             android:icon="@android:drawable/ic_input_get"
-            android:title="标签" />
+            android:title="查看及添加标签" />
         <item
             android:id="@+id/nav_tools"
-            android:icon="@android:drawable/ic_menu_today"
-            android:title="小部件" />
+            android:icon="@android:drawable/ic_input_delete"
+            android:title="删除标签" />
         <item
             android:id="@+id/nav_colors"
             android:icon="@android:drawable/presence_online"

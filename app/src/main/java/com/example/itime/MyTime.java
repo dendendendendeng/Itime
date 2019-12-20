@@ -11,15 +11,25 @@ public class MyTime implements Serializable {
     java.util.Date date;
     long repeat;
     byte[] picture;
+    String label;
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
 
     public MyTime (){ }
 
-    public MyTime(String title, String tips, Date date,long repeat,byte[] picture) {
+    public MyTime(String title, String tips, Date date,long repeat,byte[] picture,String label) {
         this.title = title;
         this.tips = tips;
         this.date = date;
         this.repeat = repeat;
         this.picture = picture;
+        this.label = label;
     }
 
     public byte[] getPicture() {

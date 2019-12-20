@@ -2,6 +2,7 @@ package com.example.itime;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -9,19 +10,23 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -52,6 +57,9 @@ public class AddActivity extends AppCompatActivity {
     ImageButton button_confirm;
     ImageView imageView;
     int Position;
+    int temp = 0 ;//用于遍历
+    ArrayAdapter adapter;
+    ListView listView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -103,8 +111,8 @@ public class AddActivity extends AppCompatActivity {
         });
 
         initItem();
-        ArrayAdapter adapter = new AddAdapter(this,R.layout.list_item_main,addItemList);
-        ListView listView = (ListView) findViewById(R.id.add_list_view);
+        adapter = new AddAdapter(this,R.layout.list_item_main,addItemList);
+        listView = (ListView) findViewById(R.id.add_list_view);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
@@ -130,31 +138,10 @@ public class AddActivity extends AppCompatActivity {
                         datePickerDialog.show();
                         break;
                     case 1:
+                        final String[] how_often = {"无", "每天", "每周", "每月", "每年"};
                         new AlertDialog.Builder(AddActivity.this)
                                 .setTitle("周期")
-                                .setItems(new String[]{"无", "每天", "每周", "每月", "每年"},null /*new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        TextView subText = (TextView) findViewById(R.id.textView_sub_list_main);
-                                        switch (which){
-                                            case 0:
-                                                subText.setText("无");
-                                                break;
-                                            case 1:
-                                                subText.setText("每天");
-                                                break;
-                                            case 2:
-                                                subText.setText("每周");
-                                                break;
-                                            case 3:
-                                                subText.setText("每月");
-                                                break;
-                                            case 4:
-                                                subText.setText("每年");
-                                                break;
-                                        }
-                                    }
-                                }*/)
+                                .setItems(how_often, null)
                                 .show();
                         break;
                     case 2:
@@ -167,7 +154,67 @@ public class AddActivity extends AppCompatActivity {
                         startActivityForResult(intent, 1);
                         break;
                     case 3:
-                        Toast.makeText(AddActivity.this,"你点击了第 "+(position+1)+" 个",Toast.LENGTH_SHORT).show();
+                        final Dialog dialog;
+                        final LayoutInflater inflater=LayoutInflater.from(AddActivity.this);
+                        final View myview=inflater.inflate(R.layout.layout_label_add,null);//引用自定义布局
+                        AlertDialog.Builder builder=new AlertDialog.Builder(AddActivity.this);
+                        builder.setView( myview );
+                        dialog=builder.create();//创建对话框
+                        dialog.show();//显示对话框
+                        final EditText input = myview.findViewById(R.id.editText_label_add);
+                        myview.findViewById(R.id.button_label_add_return).setOnClickListener(new View.OnClickListener() {//获取布局里面按钮
+                            @Override
+                            public void onClick(View v) {
+                                dialog.dismiss();//点击按钮对话框消失
+                            }
+                        } );
+                        LinearLayout linearLayout = myview.findViewById(R.id.layout_label_check_add);
+
+                        //加载已经存在的标签
+                        temp = 0;
+                        while (temp<MainActivity.Labels.size()){
+                            final Button button_label = new Button(AddActivity.this);
+                            button_label.setText(MainActivity.Labels.get(temp));
+                            button_label.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                            button_label.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    myTime.setLabel(button_label.getText().toString());
+                                    addItemList.get(3).setSubtext(button_label.getText().toString());
+                                    adapter.notifyDataSetChanged();
+                                    dialog.dismiss();
+                                }
+                            });
+                            linearLayout.addView(button_label);
+                            TextView textView = new TextView(AddActivity.this);
+                            textView.setText(" ");
+                            textView.setTextSize(20);
+                            linearLayout.addView(textView);
+                            temp++;
+                        }
+
+                        //添加新标签
+                        myview.findViewById(R.id.button_label_add_comfirm).setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                if(input.getText().toString().trim().isEmpty())
+                                    Toast.makeText(AddActivity.this, "不能输入空标签", Toast.LENGTH_SHORT).show();
+                                else{
+                                    boolean alive = true;
+                                    for (int t = 0;t<MainActivity.Labels.size();t++){
+                                        if (input.getText().toString().equals(MainActivity.Labels.get(t))){
+                                            alive = false;
+                                        }
+                                    }
+                                    if (alive == true){
+                                        MainActivity.Labels.add(input.getText().toString());
+                                    }else {
+                                        Toast.makeText(AddActivity.this, "该标签已存在", Toast.LENGTH_SHORT).show();
+                                    }
+                                    dialog.dismiss();
+                                }
+                            }
+                        });
                         break;
 
                 }
@@ -215,7 +262,7 @@ public class AddActivity extends AppCompatActivity {
 
     //初始化listview内容
     private void initItem() {
-        Add_item date = new Add_item(R.drawable.clock,"日期","长按使用日期计算器","");
+        Add_item date = new Add_item(R.drawable.clock,"日期","","");
         addItemList.add(date);
         Add_item setting = new Add_item(R.drawable.cir,"重复设置","无","");
         addItemList.add(setting);
@@ -308,5 +355,4 @@ public class AddActivity extends AppCompatActivity {
             return view;
         }
     }
-
 }
